@@ -32,6 +32,7 @@
 (def *content* true)
 
 (defn- initialize-index
+  "Updates the index to reflect the current settings."
   [index]
   (swap! index merge {:optimize-frequency *optimize-frequency*
                       :merge-factor *merge-factor*
@@ -58,13 +59,12 @@
 (defn- index-writer
   "Create an IndexWriter."
   [index]
-  (let [writer (IndexWriter. (:index @index)
-                             *analyzer*
-                             IndexWriter$MaxFieldLength/UNLIMITED)]
-    (.setMergeFactor writer (:merge-factor @index))
-    (.setUseCompoundFile writer (:compound-file @index))
-    (.setRAMBufferSizeMB writer (:ram-buffer-size @index))
-    writer))
+  (doto (IndexWriter. (:index @index)
+                      *analyzer*
+                      IndexWriter$MaxFieldLength/UNLIMITED)
+    (.setMergeFactor (:merge-factor @index))
+    (.setUseCompoundFile (:compound-file @index))
+    (.setRAMBufferSizeMB (:ram-buffer-size @index))))
 
 (defn- optimize-index
   "Optimized the provided index if the number of updates matches or
