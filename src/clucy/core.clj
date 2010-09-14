@@ -18,6 +18,7 @@
 (def *version*  Version/LUCENE_30)
 (def *analyzer* (StandardAnalyzer. *version*))
 (def *optimize-frequency* 1)
+(def *merge-factor* 10)
 
 (defstruct
     #^{:doc "Structure for clucy indexes."}
@@ -32,6 +33,7 @@
   (atom (struct-map clucy-index
           :index (RAMDirectory.)
           :optimize-frequency *optimize-frequency*
+          :merge-factor *merge-factor*
           :updates 0)))
 
 (defn disk-index
@@ -45,9 +47,11 @@
 (defn- index-writer
   "Create an IndexWriter."
   [index]
-  (IndexWriter. (:index @index)
-                *analyzer*
-                IndexWriter$MaxFieldLength/UNLIMITED))
+  (let [writer (IndexWriter. (:index @index)
+                             *analyzer*
+                             IndexWriter$MaxFieldLength/UNLIMITED)]
+    (.setMergeFactor writer (:merge-factor @index))
+    writer))
 
 (defn- optimize-index
   "Optimized the provided index if the number of updates matches or
