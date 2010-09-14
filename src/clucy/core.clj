@@ -25,7 +25,8 @@
 
 (defstruct
     #^{:doc "Structure for clucy indexes."}
-    clucy-index :index :optimize-frequency :updates)
+  clucy-index :index :optimize-frequency :merge-factor :compound-file
+  :ram-buffer-size :optimiaze-max-num-segments :updates)
 
 ;; flag to indicate a default "_content" field should be maintained
 (def *content* true)
