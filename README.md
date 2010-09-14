@@ -66,3 +66,25 @@ providing a default search field "\_content" is used.
 
 This behavior can be disabled by binding *content* to false, you must
 then specify the default search field with every search invocation.
+
+Advanced Usage
+--------------
+
+There are several other variables you can bind in order to tune the
+performance of your index.
+
+* _\*optimize-frequency\*_ After this number of index updates, the
+  index will be optimized.
+
+* _\*optimize-max-num-segments\*_ Specifies the number of segments to
+  optimize the index down to, the default is 1.
+
+* _\*merge-factor\*_ The number of segments that are merged at once,
+  this also controls the total number of segments allowed to the
+  index.
+
+* _\*ram-buffer-size\*_ The amount of RAM used for buffering changes
+  to the index before flushing.
+
+* _\*compound-file\*_ Flag to indicate whether the compound file
+  format should be used. The default is true.
