@@ -19,6 +19,9 @@
 (def *analyzer* (StandardAnalyzer. *version*))
 (def *optimize-frequency* 1)
 (def *merge-factor* 10)
+(def *ram-buffer-size* IndexWriter/DEFAULT_RAM_BUFFER_SIZE_MB)
+(def *compound-file* true)
+(def *optimize-max-num-segments* 1)
 
 (defstruct
     #^{:doc "Structure for clucy indexes."}
@@ -27,22 +30,29 @@
 ;; flag to indicate a default "_content" field should be maintained
 (def *content* true)
 
+(defn- initialize-index
+  [index]
+  (swap! index merge {:optimize-frequency *optimize-frequency*
+                      :merge-factor *merge-factor*
+                      :compound-file *compound-file*
+                      :ram-buffer-size *ram-buffer-size*
+                      :optimize-max-num-segments *optimize-max-num-segments*
+                      :updates 0})
+  index)
+
 (defn memory-index
   "Create a new index in RAM."
   []
-  (atom (struct-map clucy-index
-          :index (RAMDirectory.)
-          :optimize-frequency *optimize-frequency*
-          :merge-factor *merge-factor*
-          :updates 0)))
+  (initialize-index
+   (atom (struct-map clucy-index
+           :index (RAMDirectory.)))))
 
 (defn disk-index
   "Create a new index in a directory on disk."
   [dir-path]
-  (atom (struct-map clucy-index
-          :index (NIOFSDirectory. (File. dir-path))
-          :optimize-frequency *optimize-frequency*
-          :updates 0)))
+  (initialize-index
+   (atom (struct-map clucy-index
+           :index (NIOFSDirectory. (File. dir-path))))))
 
 (defn- index-writer
   "Create an IndexWriter."
@@ -51,6 +61,8 @@
                              *analyzer*
                              IndexWriter$MaxFieldLength/UNLIMITED)]
     (.setMergeFactor writer (:merge-factor @index))
+    (.setUseCompoundFile writer (:compound-file @index))
+    (.setRAMBufferSizeMB writer (:ram-buffer-size @index))
     writer))
 
 (defn- optimize-index
@@ -59,7 +71,7 @@
   [index]
   (if (<= (:optimize-frequency @index) (:updates @index))
     (with-open [writer (index-writer index)]
-      (.optimize writer)
+      (.optimize writer (:optimize-max-num-segments @index))
       (swap! index assoc :updates 0))
     index))
 
