@@ -83,8 +83,5 @@ performance of your index.
   this also controls the total number of segments allowed to the
   index.
 
-* _\*ram-buffer-size\*_ The amount of RAM used for buffering changes
-  to the index before flushing.
-
 * _\*compound-file\*_ Flag to indicate whether the compound file
   format should be used. The default is true.
